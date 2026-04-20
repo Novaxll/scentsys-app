@@ -1,13 +1,11 @@
 const path = require('path');
 
 exports.renderMarcas = (req, res) => {
-    // Usamos path.join para asegurar que la ruta sea correcta en Linux/Docker
-    const file = path.join(__dirname, '../views/marcas.html');
-    console.log("Intentando enviar archivo:", file); // Esto saldrá en tus logs de Docker
-    res.sendFile(file);
+    // Esta envía la vista de Marcas
+    res.sendFile(path.join(__dirname, '../views/marcas.html'));
 };
 
 exports.renderPerfumes = (req, res) => {
-    const file = path.join(__dirname, '../views/perfumes.html');
-    res.sendFile(file);
+    // ¡AQUÍ ESTABA EL ERROR! Asegúrate de que diga perfumes.html
+    res.sendFile(path.join(__dirname, '../views/perfumes.html'));
 };
