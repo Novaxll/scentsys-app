@@ -11,13 +11,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 
-// 3. Rutas principales (El orden importa)
+// Tus rutas actuales
 app.use('/api', apiRoutes);
 app.use('/', viewsRoutes);
 
-// 4. Manejador 404 (Atrapa todo lo que no coincidió arriba)
+// HOTFIX: Manejador de errores estricto para la API (Evita que el Frontend reciba HTML y rompa JSON.parse)
+app.use('/api', (err, req, res, next) => {
+    console.error("API Error:", err);
+    res.status(500).json({ error: "Error interno del servidor", detalle: err.message });
+});
+
+// Manejador 404
 app.use((req, res) => {
-    res.status(404).send('No Se Encuentra. La ruta no existe en Express.');
+    res.status(404).send('No Se Encuentra');
 });
 
 module.exports = app;

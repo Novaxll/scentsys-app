@@ -5,6 +5,5 @@ exports.renderMarcas = (req, res) => {
 };
 
 exports.renderPerfumes = (req, res) => {
-    // IMPORTANTE: Que diga perfumes.html aquí
     res.sendFile(path.join(__dirname, '../views/perfumes.html'));
 };

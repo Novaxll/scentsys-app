@@ -2,10 +2,10 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Localizamos la carpeta public/uploads
+// Ruta absoluta a la carpeta de uploads
 const uploadDir = path.join(__dirname, '../../public/uploads');
 
-// ESCUDO: Si la carpeta no existe, la creamos al encender el server
+// ESCUDO: Si la carpeta no existe, la creamos en el acto
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -15,8 +15,9 @@ const storage = multer.diskStorage({
         cb(null, uploadDir); 
     },
     filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
+        // Limpiamos espacios y caracteres raros en el nombre de la imagen
+        const safeName = file.originalname.replace(/[^a-zA-Z0-9.]/g, '-');
+        cb(null, Date.now() + '-' + safeName);
     }
 });
 
