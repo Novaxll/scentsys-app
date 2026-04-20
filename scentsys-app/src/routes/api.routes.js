@@ -14,7 +14,10 @@ router.delete('/marcas/:id', marcaCtrl.deleteMarca);
 // Rutas de Perfumes
 router.get('/perfumes', perfumeCtrl.getAllPerfumes);
 router.post('/perfumes', upload.single('imagen_perfume'), perfumeCtrl.createPerfume);
-// Si usas el endpoint filtrado por ID
+router.put('/perfumes/:id', upload.single('imagen_perfume'), perfumeCtrl.updatePerfume);
+router.delete('/perfumes/:id', perfumeCtrl.deletePerfume);
+
+// Ruta filtrada
 router.get('/marcas/:id/perfumes', async (req, res) => {
     req.query.id_marca = req.params.id;
     return perfumeCtrl.getAllPerfumes(req, res);

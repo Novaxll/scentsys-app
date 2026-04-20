@@ -2,7 +2,6 @@ const pool = require('../config/db');
 
 exports.getAllPerfumes = async (req, res) => {
     try {
-        // Extraemos id_marca si viene en la query (para la vista filtrada)
         const { id_marca } = req.query;
         let query = 'SELECT * FROM perfumes';
         let params = [];
@@ -34,5 +33,49 @@ exports.createPerfume = async (req, res) => {
     } catch (error) {
         console.error("Error al crear perfume:", error);
         res.status(500).json({ error: "Error interno al guardar en la base de datos" });
+    }
+};
+
+exports.updatePerfume = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { id_marca, nombre, ml, concentracion, precio } = req.body;
+        
+        let query = 'UPDATE perfumes SET id_marca=?, nombre=?, ml=?, concentracion=?, precio=?';
+        let params = [id_marca, nombre, ml, concentracion, precio];
+
+        if (req.file) {
+            query += ', imagen_perfume=?';
+            params.push(`/uploads/${req.file.filename}`);
+        }
+        
+        query += ' WHERE id_perfume=?';
+        params.push(id);
+
+        const [result] = await pool.query(query, params);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "El perfume especificado no existe." });
+        }
+        
+        res.json({ message: "Perfume actualizado correctamente" });
+    } catch (error) {
+        console.error("Error al actualizar perfume:", error);
+        res.status(500).json({ error: "Error interno al actualizar el perfume" });
+    }
+};
+
+exports.deletePerfume = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [result] = await pool.query('DELETE FROM perfumes WHERE id_perfume=?', [id]);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "El perfume especificado no existe." });
+        }
+        res.json({ message: "Perfume eliminado del catálogo." });
+    } catch (error) {
+        console.error("Error al eliminar perfume:", error);
+        res.status(500).json({ error: "Error interno al eliminar el perfume." });
     }
 };

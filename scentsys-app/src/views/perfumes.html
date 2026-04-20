@@ -93,8 +93,8 @@
                 <form id="perfumeForm">
                     <div style="display: flex; gap: 10px;">
                         <div class="form-group">
-                            <label>ID Perfume</label>
-                            <input type="text" id="prodId" class="form-control" placeholder="Autogen" disabled>
+                            <label>ID Perfume (Update/Delete)</label>
+                            <input type="number" id="prodId" class="form-control" placeholder="Ej. 1">
                         </div>
                         <div class="form-group">
                             <label>ID Marca</label>
@@ -135,8 +135,8 @@
                     <div class="crud-buttons">
                         <button type="button" class="btn btn-create" onclick="createPerfume()">Create</button>
                         <button type="button" class="btn btn-read" onclick="fetchPerfumes()">Read</button>
-                        <button type="button" class="btn btn-update" onclick="log('[UPDATE] Pendiente en Frontend', 'warning')">Update</button>
-                        <button type="button" class="btn btn-delete" onclick="log('[DELETE] Pendiente en Frontend', 'error')">Delete</button>
+                        <button type="button" class="btn btn-update" onclick="updatePerfume()">Update</button>
+                        <button type="button" class="btn btn-delete" onclick="deletePerfume()">Delete</button>
                     </div>
                 </form>
             </div>
@@ -236,7 +236,7 @@
             const imageFile = document.getElementById('prodImage').files[0];
 
             if (!brandId || !name || !ml || !price) {
-                log('[ERROR] Faltan campos obligatorios.', 'error');
+                log('[ERROR] Faltan campos obligatorios para guardar.', 'error');
                 return;
             }
 
@@ -268,6 +268,88 @@
                     
                     const params = new URLSearchParams(window.location.search);
                     if(params.get('id_marca')) document.getElementById('brandId').value = params.get('id_marca');
+                } else {
+                    const err = await response.json();
+                    log(`[ERROR] ${err.error}`, 'error');
+                }
+            } catch (error) {
+                log(`[ERROR] Fallo de red: ${error.message}`, 'error');
+            }
+        }
+
+        // --- Actualizar Perfume (UPDATE) ---
+        async function updatePerfume() {
+            const id = document.getElementById('prodId').value;
+            const brandId = document.getElementById('brandId').value;
+            const name = document.getElementById('prodName').value;
+            const ml = document.getElementById('prodVol').value;
+            const conc = document.getElementById('prodConc').value;
+            const price = document.getElementById('prodPrice').value;
+            const imageFile = document.getElementById('prodImage').files[0];
+
+            if (!id) {
+                log('[ERROR] Necesitas el ID del Perfume para actualizar.', 'error');
+                return;
+            }
+            if (!brandId || !name || !ml || !price) {
+                log('[ERROR] Faltan campos obligatorios para actualizar.', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('id_marca', brandId);
+            formData.append('nombre', name);
+            formData.append('ml', ml);
+            formData.append('concentracion', conc);
+            formData.append('precio', price);
+            if (imageFile) formData.append('imagen_perfume', imageFile);
+
+            log(`[UPDATE] Enviando petición PUT a /api/perfumes/${id}...`, 'warning');
+
+            try {
+                const response = await fetch(`/api/perfumes/${id}`, {
+                    method: 'PUT',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    log('[OK] Perfume actualizado con éxito.', 'success');
+                    fetchPerfumes();
+                    document.getElementById('perfumeForm').reset();
+                    document.getElementById('imagePreview').style.display = 'none';
+                } else {
+                    const err = await response.json();
+                    log(`[ERROR] ${err.error}`, 'error');
+                }
+            } catch (error) {
+                log(`[ERROR] Fallo de red: ${error.message}`, 'error');
+            }
+        }
+
+        // --- Eliminar Perfume (DELETE) ---
+        async function deletePerfume() {
+            const id = document.getElementById('prodId').value;
+
+            if (!id) {
+                log('[ERROR] Necesitas el ID del Perfume para eliminar.', 'error');
+                return;
+            }
+
+            if (!confirm(`¿Estás seguro de eliminar el perfume con ID ${id}?`)) {
+                return;
+            }
+
+            log(`[DELETE] Enviando petición DELETE a /api/perfumes/${id}...`, 'error');
+
+            try {
+                const response = await fetch(`/api/perfumes/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    log('[OK] Perfume eliminado.', 'success');
+                    fetchPerfumes();
+                    document.getElementById('perfumeForm').reset();
                 } else {
                     const err = await response.json();
                     log(`[ERROR] ${err.error}`, 'error');
