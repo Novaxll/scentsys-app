@@ -1,8 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const viewsCtrl = require('../controllers/views.controller');
+const viewsController = require('../controllers/views.controller');
 
-router.get('/marcas', viewsCtrl.renderMarcas);
-router.get('/perfumes', viewsCtrl.renderPerfumes);
+router.get('/marcas', viewsController.renderMarcas);
+router.get('/perfumes', viewsController.renderPerfumes);
+
+// Redirección: Si alguien entra a la raíz "/", lo mandamos a "/marcas"
+router.get('/', (req, res) => {
+    res.redirect('/marcas');
+});
 
 module.exports = router;
