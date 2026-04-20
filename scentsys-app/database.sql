@@ -1,7 +1,3 @@
--- database.sql
-CREATE DATABASE IF NOT EXISTS scentsys_db;
-USE scentsys_db;
-
 CREATE TABLE marcas (
     id_marca INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL UNIQUE,
