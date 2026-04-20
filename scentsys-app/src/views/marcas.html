@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScentSys | Gestión de Marcas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --ubuntu-orange: #E95420;
+            --ubuntu-aubergine: #772953;
+            --ubuntu-dark: #2C001E;
+            --bg-light: #F7F7F9;
+            --card-bg: #FFFFFF;
+            --text-main: #333333;
+            --text-muted: #6B7280;
+            --border-color: #E5E7EB;
+            
+            --btn-create: #38B000;
+            --btn-read: #0077B6;
+            --btn-update: #F5A623;
+            --btn-delete: #D00000;
+            
+            --terminal-bg: #300A24;
+            --terminal-text: #FFFFFF;
+            --terminal-success: #8AE234;
+            --terminal-error: #EF2929;
+            --terminal-warning: #FCE94F;
+            --terminal-info: #729FCF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Ubuntu', sans-serif;
+        }
+
+        .global-navbar {
+            background-color: var(--ubuntu-dark);
+            color: white;
+            padding: 0.5rem 2rem;
+            display: flex;
+            gap: 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 2px solid var(--ubuntu-orange);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .global-navbar a {
+            color: white;
+            text-decoration: none;
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background 0.3s, color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .global-navbar a:hover, .global-navbar a.active {
+            background-color: rgba(255,255,255,0.1);
+            color: var(--ubuntu-orange);
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--ubuntu-dark), var(--ubuntu-aubergine));
+            color: white;
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .user-badge {
+            background: rgba(255,255,255,0.1);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-link {
+            text-decoration: none;
+            background-color: var(--ubuntu-orange);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: filter 0.2s, transform 0.1s;
+        }
+
+        .btn-link:hover {
+            filter: brightness(1.1);
+        }
+        
+        .btn-link:active {
+            transform: translateY(1px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            color: var(--ubuntu-aubergine);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Formulario */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.4rem;
+            color: var(--text-muted);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--ubuntu-orange);
+            box-shadow: 0 0 0 3px rgba(233, 84, 32, 0.1);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Imagen Upload */
+        .image-upload-wrapper {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-light);
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .image-upload-wrapper:hover {
+            border-color: var(--ubuntu-orange);
+            background-color: rgba(233, 84, 32, 0.05);
+        }
+
+        .image-upload-wrapper i {
+            font-size: 2.5rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .image-upload-wrapper span {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .image-upload-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        #imagePreview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+            z-index: 2;
+        }
+
+        /* Botones CRUD */
+        .crud-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.1s, box-shadow 0.2s, filter 0.2s;
+            color: white;
+        }
+
+        .btn-table {
+            background-color: var(--btn-read);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.2s;
+        }
+
+        .btn-table:hover {
+            background-color: #005f8f;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+        }
+
+        .btn:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-create { background-color: var(--btn-create); }
+        .btn-read { background-color: var(--btn-read); }
+        .btn-update { background-color: var(--btn-update); }
+        .btn-delete { background-color: var(--btn-delete); }
+
+        /* Panel Central */
+        .dashboard-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Data Table */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: var(--bg-light);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: rgba(233, 84, 32, 0.05);
+        }
+
+        .product-img-thumb {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            background-color: var(--border-color);
+            object-fit: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+        }
+
+        .badge-nicho { background-color: rgba(119, 41, 83, 0.1); color: var(--ubuntu-aubergine); border-color: rgba(119, 41, 83, 0.2); }
+        .badge-designer { background-color: rgba(233, 84, 32, 0.1); color: var(--ubuntu-orange); border-color: rgba(233, 84, 32, 0.2); }
+        .badge-lujo { background-color: rgba(44, 0, 30, 0.1); color: var(--ubuntu-dark); border-color: rgba(44, 0, 30, 0.2); }
+
+        /* Terminal Panel */
+        .terminal {
+            background-color: var(--terminal-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            height: 250px;
+            overflow-y: auto;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .terminal-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(255,255,255,0.1);
+            padding: 5px 15px;
+            font-size: 0.8rem;
+            color: #aaa;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .terminal-content {
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        .log-line {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .log-time {
+            color: #888;
+            margin-right: 10px;
+        }
+
+        .log-success { color: var(--terminal-success); }
+        .log-error { color: var(--terminal-error); }
+        .log-warning { color: var(--terminal-warning); }
+        .log-info { color: var(--terminal-info); }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background-color: var(--terminal-success);
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Status Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.2rem;
+            border-radius: 10px;
+            border-left: 4px solid var(--ubuntu-orange);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stat-card:nth-child(2) { border-left-color: var(--ubuntu-aubergine); }
+        .stat-card:nth-child(3) { border-left-color: var(--btn-read); }
+
+        .stat-title {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 0.5rem;
+            font-family: 'Ubuntu', sans-serif;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Custom Scrollbar for Terminal */
+        .terminal::-webkit-scrollbar {
+            width: 8px;
+        }
+        .terminal::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2); 
+        }
+        .terminal::-webkit-scrollbar-thumb {
+            background: #555; 
+            border-radius: 4px;
+        }
+        .terminal::-webkit-scrollbar-thumb:hover {
+            background: #777; 
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="global-navbar">
+        <a href="/marcas" class="active"><i class="fa-solid fa-tags"></i> Marcas</a>
+        <a href="/perfumes"><i class="fa-solid fa-spray-can-sparkles"></i> Perfumes</a>
+    </nav>
+
+    <header>
+        <h1><i class="fa-solid fa-copyright"></i> ScentSys Admin - Marcas</h1>
+        <div class="header-actions">
+            <a href="/perfumes" class="btn-link">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> Ir a Gestión de Perfumes
+            </a>
+            <div class="user-badge">
+                <i class="fa-solid fa-circle-user"></i> Workspace Local
+            </div>
+            <i class="fa-solid fa-gear" style="cursor: pointer; opacity: 0.8; transition: 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"></i>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <aside>
+            <div class="card">
+                <div class="card-header">
+                    <i class="fa-solid fa-tags"></i> Gestión de Marca
+                </div>
+                
+                <form id="brandForm" onsubmit="event.preventDefault();">
+                    <div class="form-group">
+                        <label for="brandId">Brand ID (Auto-generado / Búsqueda)</label>
+                        <input type="text" id="brandId" class="form-control" placeholder="Ej. BRD-001" autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="brandName">Nombre de la Marca</label>
+                        <input type="text" id="brandName" class="form-control" placeholder="Ej. Giorgio Armani" required>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="brandCountry">País de Origen</label>
+                            <input type="text" id="brandCountry" class="form-control" placeholder="Ej. Italia" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="brandYear">Año de Fundación</label>
+                            <input type="number" id="brandYear" class="form-control" placeholder="Ej. 1975" min="1700" max="2026" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="brandCategory">Categoría de Marca</label>
+                        <select id="brandCategory" class="form-control">
+                            <option value="Diseñador" selected>Diseñador</option>
+                            <option value="Nicho">Nicho</option>
+                            <option value="Indie">Indie</option>
+                            <option value="Lujo">Alta Gama / Lujo</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Logo / Imagen Institucional</label>
+                        <div class="image-upload-wrapper">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Haz clic para subir logo</span>
+                            <input type="file" id="brandImage" class="image-upload-input" accept="image/*">
+                            <img id="imagePreview" alt="Vista previa del logo">
+                        </div>
+                    </div>
+
+                    <div class="crud-buttons">
+                        <button type="button" class="btn btn-create" onclick="simulateAction('create')">
+                            <i class="fa-solid fa-plus"></i> Create
+                        </button>
+                        <button type="button" class="btn btn-read" onclick="simulateAction('read')">
+                            <i class="fa-solid fa-magnifying-glass"></i> Read
+                        </button>
+                        <button type="button" class="btn btn-update" onclick="simulateAction('update')">
+                            <i class="fa-solid fa-pen-to-square"></i> Update
+                        </button>
+                        <button type="button" class="btn btn-delete" onclick="simulateAction('delete')">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </aside>
+
+        <main class="dashboard-content">
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Marcas Activas</div>
+                    <div class="stat-value">142</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Nuevos Registros</div>
+                    <div class="stat-value">8</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Última Sincronización</div>
+                    <div class="stat-value" style="font-size: 1.2rem; margin-top: 1rem;">Hace 2 min</div>
+                </div>
+            </div>
+
+            <div class="card" style="background-color: var(--terminal-bg); padding: 0; border: 1px solid #444;">
+                <div class="terminal">
+                    <div class="terminal-header">
+                        <span>scentsys@ubuntu-server:~/backend/brands_logs</span>
+                        <span>bash - 80x24</span>
+                    </div>
+                    <div class="terminal-content" id="terminalLog">
+                        <div class="log-line"><span class="log-time">[10:12:05]</span><span class="log-info">Sistema inicializado. Conexión a DB simulada OK.</span></div>
+                        <div class="log-line"><span class="log-time">[10:12:06]</span><span class="log-info">Módulo de Marcas activo. Esperando comandos CRUD...</span></div>
+                    </div>
+                    <div style="margin-top: 5px; display: flex; align-items: center; color: var(--terminal-success);">
+                        <span style="margin-right: 8px;">admin@scentsys:~$</span> <span class="cursor"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" style="border-bottom: none; margin-bottom: 0;">
+                    <i class="fa-solid fa-table-list"></i> Directorio de Marcas (Vista Previa)
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Logo</th>
+                                <th>Marca</th>
+                                <th>País</th>
+                                <th>Fundación</th>
+                                <th>Categoría</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="text-muted">BRD-102</span></td>
+                                <td><div class="product-img-thumb"><i class="fa-solid fa-image" style="color: #999;"></i></div></td>
+                                <td><strong>Mancera</strong></td>
+                                <td>Francia</td>
+                                <td>2008</td>
+                                <td><span class="badge badge-nicho">Nicho</span></td>
+                                <td>
+                                    <a href="/perfumes?id_marca=BRD-102" class="btn-table">
+                                        <i class="fa-solid fa-eye"></i> Ver Perfumes
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="text-muted">BRD-103</span></td>
+                                <td><div class="product-img-thumb"><i class="fa-solid fa-image" style="color: #999;"></i></div></td>
+                                <td><strong>Giorgio Armani</strong></td>
+                                <td>Italia</td>
+                                <td>1975</td>
+                                <td><span class="badge badge-designer">Diseñador</span></td>
+                                <td>
+                                    <a href="/perfumes?id_marca=BRD-103" class="btn-table">
+                                        <i class="fa-solid fa-eye"></i> Ver Perfumes
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="text-muted">BRD-089</span></td>
+                                <td><div class="product-img-thumb"><i class="fa-solid fa-image" style="color: #999;"></i></div></td>
+                                <td><strong>Chanel</strong></td>
+                                <td>Francia</td>
+                                <td>1910</td>
+                                <td><span class="badge badge-lujo">Lujo</span></td>
+                                <td>
+                                    <a href="/perfumes?id_marca=BRD-089" class="btn-table">
+                                        <i class="fa-solid fa-eye"></i> Ver Perfumes
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('brandImage');
+        const imagePreview = document.getElementById('imagePreview');
+
+        imageInput.addEventListener('change', function(e) {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    imagePreview.src = event.target.result;
+                    imagePreview.style.display = 'block';
+                    addLogTerminal('[INFO] Logo de marca asociado correctamente en memoria.', 'info');
+                }
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.style.display = 'none';
+            }
+        });
+
+        const terminalContent = document.getElementById('terminalLog');
+        
+        function getFormattedTime() {
+            const now = new Date();
+            return `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}]`;
+        }
+
+        function addLogTerminal(message, type) {
+            const logLine = document.createElement('div');
+            logLine.className = 'log-line';
+            
+            let colorClass = 'log-info';
+            if (type === 'success') colorClass = 'log-success';
+            if (type === 'error') colorClass = 'log-error';
+            if (type === 'warning') colorClass = 'log-warning';
+
+            logLine.innerHTML = `<span class="log-time">${getFormattedTime()}</span><span class="${colorClass}">${message}</span>`;
+            terminalContent.appendChild(logLine);
+            
+            const terminalContainer = document.querySelector('.terminal');
+            terminalContainer.scrollTop = terminalContainer.scrollHeight;
+        }
+
+        function simulateAction(action) {
+            const name = document.getElementById('brandName').value;
+            const country = document.getElementById('brandCountry').value;
+            const id = document.getElementById('brandId').value || 'AUTO-GEN';
+
+            if (action === 'read') {
+                if(!id || id === 'AUTO-GEN' && !name) {
+                    addLogTerminal('[ERROR] Se requiere ID o Nombre para ejecutar [READ].', 'error');
+                    return;
+                }
+                addLogTerminal(`[INFO] Ejecutando SELECT * FROM marcas WHERE id='${id}' OR name LIKE '%${name}%'`, 'info');
+                setTimeout(() => addLogTerminal(`[OK] Marca recuperada de la base de datos.`, 'success'), 500);
+                return;
+            }
+
+            if (!name || !country) {
+                addLogTerminal(`[ERROR] Faltan campos obligatorios (Nombre, País) para operación [${action.toUpperCase()}].`, 'error');
+                return;
+            }
+
+            switch(action) {
+                case 'create':
+                    if (id !== 'AUTO-GEN' && id.length > 0) {
+                        if (Math.random() > 0.7) {
+                            addLogTerminal(`[ERROR] ID duplicado: La marca con ID [${id}] ya existe.`, 'error');
+                            return;
+                        }
+                    }
+                    addLogTerminal(`[INFO] Iniciando transacción INSERT para marca [${name}]...`, 'info');
+                    setTimeout(() => addLogTerminal(`[OK] Marca registrada correctamente en el directorio.`, 'success'), 600);
+                    break;
+                case 'update':
+                    addLogTerminal(`[UPDATE] Iniciando transacción UPDATE para marca ID [${id}]...`, 'warning');
+                    setTimeout(() => addLogTerminal(`[OK] Datos de marca actualizados. Directorio sincronizado.`, 'success'), 600);
+                    break;
+                case 'delete':
+                    addLogTerminal(`[WARNING] Solicitud DELETE recibida para marca ID [${id}]`, 'error');
+                    setTimeout(() => addLogTerminal(`[OK] Marca eliminada del sistema.`, 'warning'), 800);
+                    break;
+            }
+        }
+        
+        // Función para cargar marcas desde la API real
+async function loadRealBrands() {
+    try {
+        const response = await fetch('/api/marcas'); // Llamada al backend
+        const marcas = await response.json();
+        
+        const tbody = document.querySelector('table tbody');
+        tbody.innerHTML = ''; // Limpiamos las filas estáticas (Chanel, etc.)
+
+        marcas.forEach(marca => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><span class="text-muted">${marca.id_marca}</span></td>
+                    <td>
+                        <div class="product-img-thumb">
+                            ${marca.logo_imagen 
+                                ? `<img src="${marca.logo_imagen}" style="width:100%; height:100%; object-fit:cover; border-radius:6px;">` 
+                                : '<i class="fa-solid fa-image" style="color: #999;"></i>'}
+                        </div>
+                    </td>
+                    <td><strong>${marca.nombre}</strong></td>
+                    <td>${marca.pais_origen}</td>
+                    <td>${marca.fundacion}</td>
+                    <td><span class="badge badge-nicho">${marca.categoria}</span></td>
+                    <td>
+                        <a href="/perfumes?id_marca=${marca.id_marca}" class="btn-table">
+                            <i class="fa-solid fa-eye"></i> Ver Perfumes
+                        </a>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        // Actualizar el contador de la card superior
+        document.querySelector('.stat-value').innerText = marcas.length;
+
+    } catch (error) {
+        console.error("Error cargando marcas:", error);
+        addLogTerminal("Error al conectar con la API de marcas", "error");
+    }
+}
+
+// Ejecutar al cargar la página
+document.addEventListener('DOMContentLoaded', loadRealBrands);
+    </script>
+</body>
+</html>

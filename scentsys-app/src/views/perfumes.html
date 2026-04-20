@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScentSys | Gestión de Perfumes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --ubuntu-orange: #E95420;
+            --ubuntu-aubergine: #772953;
+            --ubuntu-dark: #2C001E;
+            --bg-light: #F7F7F9;
+            --card-bg: #FFFFFF;
+            --text-main: #333333;
+            --text-muted: #6B7280;
+            --border-color: #E5E7EB;
+            --btn-create: #38B000;
+            --btn-read: #0077B6;
+            --btn-update: #F5A623;
+            --btn-delete: #D00000;
+            --terminal-bg: #300A24;
+            --terminal-text: #FFFFFF;
+            --terminal-success: #8AE234;
+            --terminal-error: #EF2929;
+            --terminal-info: #729FCF;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); color: var(--text-main); }
+        h1, h2, h3 { font-family: 'Ubuntu', sans-serif; }
+
+        .global-navbar {
+            background-color: var(--ubuntu-dark);
+            color: white;
+            padding: 0.5rem 2rem;
+            display: flex;
+            gap: 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 2px solid var(--ubuntu-orange);
+        }
+
+        .global-navbar a {
+            color: white;
+            text-decoration: none;
+            font-family: 'Ubuntu', sans-serif;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .global-navbar a.active { background-color: rgba(255,255,255,0.1); color: var(--ubuntu-orange); }
+
+        header {
+            background: linear-gradient(135deg, var(--ubuntu-dark), var(--ubuntu-aubergine));
+            color: white;
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-link {
+            text-decoration: none;
+            background-color: var(--ubuntu-orange);
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+
+        .card { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .card-header { border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; color: var(--ubuntu-aubergine); font-weight: 600; }
+
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-muted); }
+        .form-control { width: 100%; padding: 0.7rem; border: 1px solid var(--border-color); border-radius: 6px; }
+
+        .image-upload-wrapper {
+            position: relative; height: 180px; border: 2px dashed var(--border-color); border-radius: 8px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; overflow: hidden;
+        }
+        #imagePreview { position: absolute; width: 100%; height: 100%; object-fit: cover; display: none; }
+
+        .crud-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 1rem; }
+        .btn { padding: 0.8rem; border: none; border-radius: 6px; color: white; font-weight: 600; cursor: pointer; }
+        .btn-create { background-color: var(--btn-create); }
+        .btn-read { background-color: var(--btn-read); }
+        .btn-update { background-color: var(--btn-update); }
+        .btn-delete { background-color: var(--btn-delete); }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-card { background: white; padding: 1.2rem; border-radius: 10px; border-left: 4px solid var(--ubuntu-orange); }
+        .stat-value { font-size: 1.8rem; font-weight: 700; }
+
+        .terminal { background-color: var(--terminal-bg); border-radius: 8px; padding: 1.2rem; font-family: monospace; height: 200px; overflow-y: auto; color: white; font-size: 0.85rem; }
+        .log-success { color: var(--terminal-success); }
+        .log-error { color: var(--terminal-error); }
+        .log-info { color: var(--terminal-info); }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { background-color: var(--bg-light); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
+        .img-thumb { width: 45px; height: 45px; background: #eee; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    </style>
+</head>
+<body>
+
+    <nav class="global-navbar">
+        <a href="/marcas"><i class="fa-solid fa-tags"></i> Marcas</a>
+        <a href="/perfumes" class="active"><i class="fa-solid fa-spray-can-sparkles"></i> Perfumes</a>
+    </nav>
+
+    <header>
+        <h1><i class="fa-solid fa-spray-can-sparkles"></i> ScentSys Admin</h1>
+        <div class="header-actions">
+            <a href="/marcas" class="btn-link"><i class="fa-solid fa-arrow-left"></i> Volver a Marcas</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside>
+            <div class="card">
+                <div class="card-header">Gestión de Producto</div>
+                <form id="perfumeForm">
+                    <div style="display: flex; gap: 10px;">
+                        <div class="form-group">
+                            <label>ID Perfume</label>
+                            <input type="text" id="prodId" class="form-control" placeholder="Autogen">
+                        </div>
+                        <div class="form-group">
+                            <label>ID Marca</label>
+                            <input type="text" id="brandId" class="form-control" placeholder="ID FK">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" id="prodName" class="form-control" required>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="form-group">
+                            <label>ML</label>
+                            <input type="number" id="prodVol" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo</label>
+                            <select id="prodConc" class="form-control">
+                                <option value="EDP">EDP</option>
+                                <option value="EDT">EDT</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Precio ($)</label>
+                        <input type="number" id="prodPrice" class="form-control" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Imagen</label>
+                        <div class="image-upload-wrapper" onclick="document.getElementById('prodImage').click()">
+                            <i class="fa-solid fa-upload"></i>
+                            <input type="file" id="prodImage" style="display:none" accept="image/*">
+                            <img id="imagePreview">
+                        </div>
+                    </div>
+                    <div class="crud-buttons">
+                        <button type="button" class="btn btn-create" onclick="handleCRUD('create')">Create</button>
+                        <button type="button" class="btn btn-read" onclick="handleCRUD('read')">Read</button>
+                        <button type="button" class="btn btn-update" onclick="handleCRUD('update')">Update</button>
+                        <button type="button" class="btn btn-delete" onclick="handleCRUD('delete')">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </aside>
+
+        <main>
+            <div class="stats-grid">
+                <div class="stat-card"><div>Fragancias</div><div class="stat-value" id="count-perfumes">0</div></div>
+                <div class="stat-card"><div>Categorías</div><div class="stat-value">6</div></div>
+                <div class="stat-card"><div>DB Status</div><div class="stat-value" style="font-size: 1.2rem; color: #38B000;">Online</div></div>
+            </div>
+
+            <div class="card" style="background-color: var(--terminal-bg); padding: 10px;">
+                <div class="terminal" id="terminalLog">
+                    <div class="log-info">[SISTEMA] Listo para operar.</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Catálogo de Fragancias</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Logo</th>
+                            <th>Nombre</th>
+                            <th>ML</th>
+                            <th>Tipo</th>
+                            <th>Precio</th>
+                        </tr>
+                    </thead>
+                    <tbody id="perfumeTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const log = (msg, type='info') => {
+            const div = document.getElementById('terminalLog');
+            const time = new Date().toLocaleTimeString();
+            div.innerHTML += `<div class="log-${type}">[${time}] ${msg}</div>`;
+            div.scrollTop = div.scrollHeight;
+        };
+
+        async function fetchPerfumes() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const idMarca = params.get('id_marca');
+                
+                // NOTA: Si tu app.js usa /api, deja /api. Si no, quítalo.
+                const url = idMarca ? `/api/marcas/${idMarca}/perfumes` : `/api/perfumes`;
+                
+                log(`Consultando: ${url}...`, 'info');
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!res.ok || !Array.isArray(data)) {
+                    throw new Error(data.message || "La respuesta no es una lista válida.");
+                }
+
+                const tbody = document.getElementById('perfumeTableBody');
+                tbody.innerHTML = '';
+                data.forEach(p => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${p.id_perfume}</td>
+                            <td><div class="img-thumb">${p.imagen_perfume ? `<img src="${p.imagen_perfume}" width="100%">` : '<i class="fa-solid fa-bottle-droplet"></i>'}</div></td>
+                            <td><strong>${p.nombre}</strong></td>
+                            <td>${p.ml} ml</td>
+                            <td>${p.concentracion}</td>
+                            <td>$${p.precio}</td>
+                        </tr>`;
+                });
+                document.getElementById('count-perfumes').innerText = data.length;
+                log(`Sincronización exitosa: ${data.length} perfumes cargados.`, 'success');
+
+            } catch (e) {
+                log(`ERROR: ${e.message}`, 'error');
+                console.error(e);
+            }
+        }
+
+        function handleCRUD(action) {
+            if(action === 'read') fetchPerfumes();
+            else log(`Acción ${action.toUpperCase()} no implementada en el frontend aún.`, 'info');
+        }
+
+        document.getElementById('prodImage').onchange = e => {
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const img = document.getElementById('imagePreview');
+                img.src = ev.target.result;
+                img.style.display = 'block';
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        };
+
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            if(params.get('id_marca')) document.getElementById('brandId').value = params.get('id_marca');
+            fetchPerfumes();
+        };
+    </script>
+</body>
+</html>
