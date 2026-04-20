@@ -146,23 +146,23 @@
                 
                 <form id="brandForm" onsubmit="event.preventDefault();">
                     <div class="form-group">
-                        <label for="brandId">Brand ID (Auto-generado / Búsqueda)</label>
-                        <input type="text" id="brandId" class="form-control" placeholder="Ej. BRD-001" autocomplete="off">
+                        <label for="brandId">ID Marca (Solo para Update/Delete)</label>
+                        <input type="number" id="brandId" class="form-control" placeholder="Ej. 1" autocomplete="off">
                     </div>
 
                     <div class="form-group">
                         <label for="brandName">Nombre de la Marca</label>
-                        <input type="text" id="brandName" class="form-control" placeholder="Ej. Giorgio Armani" required>
+                        <input type="text" id="brandName" class="form-control" placeholder="Ej. Giorgio Armani">
                     </div>
 
                     <div class="input-group">
                         <div class="form-group" style="flex: 1;">
                             <label for="brandCountry">País de Origen</label>
-                            <input type="text" id="brandCountry" class="form-control" placeholder="Ej. Italia" required>
+                            <input type="text" id="brandCountry" class="form-control" placeholder="Ej. Italia">
                         </div>
                         <div class="form-group" style="flex: 1;">
                             <label for="brandYear">Año de Fundación</label>
-                            <input type="number" id="brandYear" class="form-control" placeholder="Ej. 1975" min="1700" max="2026" required>
+                            <input type="number" id="brandYear" class="form-control" placeholder="Ej. 1975" min="1700" max="2026">
                         </div>
                     </div>
 
@@ -193,10 +193,10 @@
                         <button type="button" class="btn btn-read" onclick="loadRealBrands()">
                             <i class="fa-solid fa-magnifying-glass"></i> Read
                         </button>
-                        <button type="button" class="btn btn-update" onclick="addLogTerminal('[UPDATE] Función pendiente en Frontend', 'warning')">
+                        <button type="button" class="btn btn-update" onclick="updateRealBrand()">
                             <i class="fa-solid fa-pen-to-square"></i> Update
                         </button>
-                        <button type="button" class="btn btn-delete" onclick="addLogTerminal('[DELETE] Función pendiente en Frontend', 'error')">
+                        <button type="button" class="btn btn-delete" onclick="deleteRealBrand()">
                             <i class="fa-solid fa-trash"></i> Delete
                         </button>
                     </div>
@@ -334,7 +334,7 @@
                             <td>${marca.fundacion}</td>
                             <td><span class="badge ${badgeClass}">${marca.categoria}</span></td>
                             <td>
-                                <a href="/perfumes?id_marca=${marca.id_marca}" class="btn-table">
+                                <a href="/perfumes?id_marca=${marca.id_marca}" class="btn-table" style="cursor: pointer;">
                                     <i class="fa-solid fa-eye"></i> Ver Perfumes
                                 </a>
                             </td>
@@ -369,10 +369,7 @@
             formData.append('pais_origen', country);
             formData.append('fundacion', year);
             formData.append('categoria', category);
-            
-            if (imageFile) {
-                formData.append('logo_imagen', imageFile);
-            }
+            if (imageFile) formData.append('logo_imagen', imageFile);
 
             addLogTerminal('[INFO] Enviando petición POST a /api/marcas...', 'warning');
 
@@ -384,10 +381,89 @@
 
                 if (response.ok) {
                     addLogTerminal('[OK] ¡Éxito! Marca inyectada en la base de datos.', 'success');
-                    loadRealBrands(); // Recarga la tabla
-                    
+                    loadRealBrands();
                     document.getElementById('brandForm').reset();
                     document.getElementById('imagePreview').style.display = 'none';
+                } else {
+                    const err = await response.json();
+                    addLogTerminal(`[ERROR] ${err.error}`, 'error');
+                }
+            } catch (error) {
+                addLogTerminal(`[ERROR] Fallo de red: ${error.message}`, 'error');
+            }
+        }
+
+        // --- Actualizar Marca (UPDATE) ---
+        async function updateRealBrand() {
+            const id = document.getElementById('brandId').value;
+            const name = document.getElementById('brandName').value;
+            const country = document.getElementById('brandCountry').value;
+            const year = document.getElementById('brandYear').value;
+            const category = document.getElementById('brandCategory').value;
+            const imageFile = document.getElementById('brandImage').files[0];
+
+            if (!id) {
+                addLogTerminal('[ERROR] Necesitas escribir el ID de la marca para actualizarla.', 'error');
+                return;
+            }
+            if (!name || !country || !year) {
+                addLogTerminal('[ERROR] Faltan campos obligatorios para actualizar.', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('nombre', name);
+            formData.append('pais_origen', country);
+            formData.append('fundacion', year);
+            formData.append('categoria', category);
+            if (imageFile) formData.append('logo_imagen', imageFile);
+
+            addLogTerminal(`[UPDATE] Enviando petición PUT a /api/marcas/${id}...`, 'warning');
+
+            try {
+                const response = await fetch(`/api/marcas/${id}`, {
+                    method: 'PUT',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    addLogTerminal('[OK] Marca actualizada con éxito.', 'success');
+                    loadRealBrands();
+                    document.getElementById('brandForm').reset();
+                    document.getElementById('imagePreview').style.display = 'none';
+                } else {
+                    const err = await response.json();
+                    addLogTerminal(`[ERROR] ${err.error}`, 'error');
+                }
+            } catch (error) {
+                addLogTerminal(`[ERROR] Fallo de red: ${error.message}`, 'error');
+            }
+        }
+
+        // --- Eliminar Marca (DELETE) ---
+        async function deleteRealBrand() {
+            const id = document.getElementById('brandId').value;
+
+            if (!id) {
+                addLogTerminal('[ERROR] Necesitas escribir el ID de la marca para eliminarla.', 'error');
+                return;
+            }
+
+            if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente la marca con ID ${id}?`)) {
+                return;
+            }
+
+            addLogTerminal(`[DELETE] Enviando petición DELETE a /api/marcas/${id}...`, 'error');
+
+            try {
+                const response = await fetch(`/api/marcas/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    addLogTerminal('[OK] Marca eliminada permanentemente.', 'success');
+                    loadRealBrands();
+                    document.getElementById('brandForm').reset();
                 } else {
                     const err = await response.json();
                     addLogTerminal(`[ERROR] ${err.error}`, 'error');
